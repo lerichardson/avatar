@@ -7,4 +7,4 @@ services:
     ports:
       - 8004:8004
     volumes:
-        - .:/data
+        - ./data:/app/data
