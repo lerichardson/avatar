@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 app.get("/u/:username", async (req, res) => {
     const user = await db("accounts").findOne({username: req.params.username});
     if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
-    if (!fs.existsSync(`${__dirname}/data/users/${user._id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
+    if (!fs.existsSync(`${__dirname}/data/users/${user._id}`)) return res.type("image/png").sendFile(`${__dirname}/images/placeholder.png`);
     res.sendFile(`${__dirname}/data/users/${user._id}`);
 });
 
@@ -38,7 +38,7 @@ app.get("/u/:username", async (req, res) => {
 app.get("/user/:userid", async (req, res) => {
     const user = await db("accounts").findOne({_id: req.params.userid});
     if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
-    if (!fs.existsSync(`${__dirname}/data/users/${user._id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
+    if (!fs.existsSync(`${__dirname}/data/users/${user._id}`)) return res.type("image/png").sendFile(`${__dirname}/images/placeholder.png`);
     res.sendFile(`${__dirname}/data/users/${user._id}`);
 });
 
