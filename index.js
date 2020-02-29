@@ -24,7 +24,7 @@ app.get("/u/:username", async (req, res) => {
 
 //User by user id
 app.get("/user/:userid", async (req, res) => {
-    const user = await db.User.findOne({where: {username: req.params.userid}});
+    const user = await db.User.findOne({where: {id: req.params.userid}});
     if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
     if (!fs.existsSync(`${__dirname}/data/users/${user.id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
     res.type("image/png").sendFile(`${__dirname}/data/users/${user.id}`);
