@@ -4,48 +4,31 @@ const fs = require("fs");
 const express = require("express");
 const app = express();
 app.use(require("cors")());
-app.listen(8004, () => {
-    console.log("Listening on Express");
+
+//Database
+const db = require("./util/db");
+db.sync().then(() => {
+    //Express Listen
+    app.listen(8004, () => {
+        console.log("Listening on Express");
+    });
 });
-
-//MongoDB
-const db = require("./util/mongo");
-var connected = false;
-db.connect((err) => {
-    if (err) throw err;
-    connected = true;
-    console.log("Connected to MongoDB");
-});
-
-app.use((req, res, next) => {
-    if (connected) return next();
-    res.status(502).json({err: "notReady"});
-});
-
-
-
-
 
 //User by username
 app.get("/u/:username", async (req, res) => {
-    const user = await db("accounts").findOne({username: req.params.username});
+    const user = await db.User.findOne({where: {username: req.params.username}});
     if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
-    if (!fs.existsSync(`${__dirname}/data/users/${user._id}`)) return res.type("image/png").sendFile(`${__dirname}/images/placeholder.png`);
-    res.sendFile(`${__dirname}/data/users/${user._id}`);
+    if (!fs.existsSync(`${__dirname}/data/users/${user.id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
+    res.type("image/png").sendFile(`${__dirname}/data/users/${user.id}`);
 });
 
 //User by user id
 app.get("/user/:userid", async (req, res) => {
-    const user = await db("accounts").findOne({_id: req.params.userid});
+    const user = await db.User.findOne({where: {username: req.params.userid}});
     if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
-    if (!fs.existsSync(`${__dirname}/data/users/${user._id}`)) return res.type("image/png").sendFile(`${__dirname}/images/placeholder.png`);
-    res.sendFile(`${__dirname}/data/users/${user._id}`);
+    if (!fs.existsSync(`${__dirname}/data/users/${user.id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
+    res.type("image/png").sendFile(`${__dirname}/data/users/${user.id}`);
 });
-
-
-
-
-
 
 //404
 app.use((req, res) => {
