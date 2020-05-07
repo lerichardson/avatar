@@ -1,5 +1,6 @@
 const fs = require("fs");
 const axios = require("axios");
+const sharp = require("sharp");
 const images = {
     noUser: fs.readFileSync(`${__dirname}/images/noUser.png`),
     placeholder: fs.readFileSync(`${__dirname}/images/placeholder.png`)
@@ -21,18 +22,45 @@ db.sync().then(() => {
 
 //User by username
 app.get("/u/:username", async (req, res) => {
-    const user = await db.User.findOne({where: {username: req.params.username}});
-    res.type("image/png").send(await getAvatar(user));
+    res.type("image/png").send(await getAvatar(
+        {username: req.params.username},
+        req.query.size
+    ));
 });
 
 //User by user id
 app.get("/user/:userid", async (req, res) => {
-    const user = await db.User.findOne({where: {id: req.params.userid}});
-    res.type("image/png").send(await getAvatar(user));
+    res.type("image/png").send(await getAvatar(
+        {id: req.params.userid},
+        req.query.size
+    ));
 });
 
 // Get Avatar
-const getAvatar = async user => {
+const getAvatar = async (userQuery, size) => {
+    // Get User
+    const user = await db.User.findOne({
+        where: userQuery
+    });
+
+    // Image Size
+    size =
+        typeof size === "string" &&
+        !isNaN(size) &&
+        Number.isInteger(Number(size)) &&
+        Number(size) > 0 &&
+        Number(size) <= 500
+            ? Number(size) : 200;
+
+    // Get, Manipulate and Return
+    return await sharp(await getAvatarImage(user))
+        .resize(size)
+        .png()
+        .toBuffer();
+};
+
+// Get Avatar Image
+const getAvatarImage = async user => {
     if (!user) return images.noUser;
     if (!user.avatar) return images.placeholder;
     try {
