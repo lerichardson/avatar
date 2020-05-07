@@ -1,4 +1,9 @@
 const fs = require("fs");
+const axios = require("axios");
+const images = {
+    noUser: fs.readFileSync(`${__dirname}/images/noUser.png`),
+    placeholder: fs.readFileSync(`${__dirname}/images/placeholder.png`)
+};
 
 //Express
 const express = require("express");
@@ -17,18 +22,27 @@ db.sync().then(() => {
 //User by username
 app.get("/u/:username", async (req, res) => {
     const user = await db.User.findOne({where: {username: req.params.username}});
-    if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
-    if (!fs.existsSync(`${__dirname}/data/users/${user.id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
-    res.type("image/png").sendFile(`${__dirname}/data/users/${user.id}`);
+    res.type("image/png").send(await getAvatar(user));
 });
 
 //User by user id
 app.get("/user/:userid", async (req, res) => {
     const user = await db.User.findOne({where: {id: req.params.userid}});
-    if (!user) return res.sendFile(`${__dirname}/images/noUser.png`);
-    if (!fs.existsSync(`${__dirname}/data/users/${user.id}`)) return res.sendFile(`${__dirname}/images/placeholder.png`);
-    res.type("image/png").sendFile(`${__dirname}/data/users/${user.id}`);
+    res.type("image/png").send(await getAvatar(user));
 });
+
+// Get Avatar
+const getAvatar = async user => {
+    if (!user) return images.noUser;
+    if (!user.avatar) return images.placeholder;
+    try {
+        return (await axios.get(`https://fs.alles.cx/${user.avatar}`, {
+            responseType: "arraybuffer"
+        })).data;
+    } catch (e) {
+        return images.placeholder;
+    }
+};
 
 //404
 app.use((req, res) => {
