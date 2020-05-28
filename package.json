@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@alleshq/coredb-models": "^0.1.3",
     "axios": "^0.19.2",
     "coredb-models": "https://github.com/alleshq/coredb-models",
     "cors": "^2.8.5",
