@@ -6,12 +6,12 @@ const images = {
     placeholder: fs.readFileSync(`${__dirname}/images/placeholder.png`)
 };
 
-//Express
+// Express
 const express = require("express");
 const app = express();
 app.use(require("cors")());
 
-//Database
+// Database
 const db = require("./util/db");
 db.sync().then(() => {
     //Express Listen
@@ -20,7 +20,7 @@ db.sync().then(() => {
     });
 });
 
-//User by username
+// User by username
 app.get("/u/:username", async (req, res) => {
     res.type("image/png").send(await getAvatar(
         {username: req.params.username},
@@ -28,7 +28,7 @@ app.get("/u/:username", async (req, res) => {
     ));
 });
 
-//User by user id
+// User by user id
 app.get("/user/:userid", async (req, res) => {
     res.type("image/png").send(await getAvatar(
         {id: req.params.userid},
@@ -72,7 +72,7 @@ const getAvatarImage = async user => {
     }
 };
 
-//404
+// 404
 app.use((req, res) => {
     res.status(404).json({err: "invalidRoute"});
 });
