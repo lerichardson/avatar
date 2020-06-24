@@ -10,20 +10,13 @@ const images = {
 const express = require("express");
 const app = express();
 app.use(require("cors")());
-
-// Database
-const db = require("./util/db");
-db.sync().then(() => {
-    //Express Listen
-    app.listen(8004, () => {
-        console.log("Listening on Express");
-    });
-});
+app.listen(8080, () => console.log("Listening on Express"));
 
 // User by username
 app.get("/u/:username", async (req, res) => {
     res.type("image/png").send(await getAvatar(
-        {username: req.params.username},
+        req.params.username,
+        true,
         req.query.size
     ));
 });
@@ -31,17 +24,16 @@ app.get("/u/:username", async (req, res) => {
 // User by user id
 app.get("/user/:userid", async (req, res) => {
     res.type("image/png").send(await getAvatar(
-        {id: req.params.userid},
+        req.params.userid,
+        false,
         req.query.size
     ));
 });
 
 // Get Avatar
-const getAvatar = async (userQuery, size) => {
+const getAvatar = async (userParam, username, size) => {
     // Get User
-    const user = await db.User.findOne({
-        where: userQuery
-    });
+    const user = await getUser(userParam, username);
 
     // Image Size
     size =
@@ -72,7 +64,26 @@ const getAvatarImage = async user => {
     }
 };
 
+// Get User
+const getUser = async (userParam, username) => {
+    try {
+        return (await axios.get(
+            `https://1api.alles.cx/v1/user?${
+                username ? "username" : "id"
+            }=${encodeURIComponent(userParam)}`,
+            {
+                auth: {
+                    username: process.env.ALLES_ID,
+                    password: process.env.ALLES_SECRET
+                }
+            }
+        )).data;
+    } catch (err) {
+        return null;
+    }
+};
+
 // 404
 app.use((req, res) => {
-    res.status(404).json({err: "invalidRoute"});
+    res.status(404).json({err: "notFound"});
 });
