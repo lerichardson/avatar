@@ -2,7 +2,7 @@ const Avatar = require("./db");
 const axios = require("axios");
 const sharp = require("sharp");
 const fs = require("fs");
-const placeholder = fs.readFileSync(`${__dirname}/images/placeholder.png`);
+const placeholder = fs.readFileSync(`${__dirname}/placeholder.png`);
 
 module.exports = async (req, res) => {
     // Get most recent avatar for user
