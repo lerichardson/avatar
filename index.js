@@ -55,7 +55,7 @@ app.get("/:id", async (req, res) => {
             ? Number(req.query.size) : 200;
     
     // Manipulate Image
-    image = await sharp(await getAvatarImage(user))
+    image = await sharp(image)
         .resize(size)
         .png()
         .toBuffer();
