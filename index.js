@@ -1,6 +1,6 @@
-const fs = require("fs");
 const axios = require("axios");
 const sharp = require("sharp");
+const fs = require("fs");
 const images = {
     noUser: fs.readFileSync(`${__dirname}/images/noUser.png`),
     placeholder: fs.readFileSync(`${__dirname}/images/placeholder.png`)
@@ -8,69 +8,20 @@ const images = {
 
 // Express
 const express = require("express");
+const e = require("express");
 const app = express();
 app.use(require("cors")());
 app.listen(8080, () => console.log("Listening on Express"));
 
-// User by username
-app.get("/u/:username", async (req, res) => {
-    res.type("image/png").send(await getAvatar(
-        req.params.username,
-        true,
-        req.query.size
-    ));
-});
-
-// User by user id
-app.get("/user/:userid", async (req, res) => {
-    res.type("image/png").send(await getAvatar(
-        req.params.userid,
-        false,
-        req.query.size
-    ));
-});
-
 // Get Avatar
-const getAvatar = async (userParam, username, size) => {
+app.get("/:id", async (req, res) => {
+    const {id} = req.params;
+
     // Get User
-    const user = await getUser(userParam, username);
-
-    // Image Size
-    size =
-        typeof size === "string" &&
-        !isNaN(size) &&
-        Number.isInteger(Number(size)) &&
-        Number(size) > 0 &&
-        Number(size) <= 500
-            ? Number(size) : 200;
-
-    // Get, Manipulate and Return
-    return await sharp(await getAvatarImage(user))
-        .resize(size)
-        .png()
-        .toBuffer();
-};
-
-// Get Avatar Image
-const getAvatarImage = async user => {
-    if (!user) return images.noUser;
-    if (!user.avatar) return images.placeholder;
+    let user;
     try {
-        return (await axios.get(`https://fs.alles.cx/${user.avatar}`, {
-            responseType: "arraybuffer"
-        })).data;
-    } catch (e) {
-        return images.placeholder;
-    }
-};
-
-// Get User
-const getUser = async (userParam, username) => {
-    try {
-        return (await axios.get(
-            `https://1api.alles.cx/v1/user?${
-                username ? "username" : "id"
-            }=${encodeURIComponent(userParam)}`,
+        user = (await axios.get(
+            `https://1api.alles.cx/v1/user?id=${encodeURIComponent(id)}`,
             {
                 auth: {
                     username: process.env.ALLES_ID,
@@ -78,12 +29,40 @@ const getUser = async (userParam, username) => {
                 }
             }
         )).data;
-    } catch (err) {
-        return null;
+    } catch (err) {}
+
+    // Get Image
+    let image;
+    if (!user) image = images.noUser;
+    else if (!user.avatar) image = images.placeholder;
+    else {
+        try {
+            image = (await axios.get(`https://fs.alles.cx/${user.avatar}`, {
+                responseType: "arraybuffer"
+            })).data;
+        } catch (e) {
+            image = images.placeholder;
+        }
     }
-};
+
+    // Image Size
+    const size =
+        typeof req.query.size === "string" &&
+        !isNaN(req.query.size) &&
+        Number.isInteger(Number(req.query.size)) &&
+        Number(req.query.size) > 0 &&
+        Number(req.query.size) <= 500
+            ? Number(req.query.size) : 200;
+    
+    // Manipulate Image
+    image = await sharp(await getAvatarImage(user))
+        .resize(size)
+        .png()
+        .toBuffer();
+
+    // Response
+    res.type("image/png").send(image);
+});
 
 // 404
-app.use((req, res) => {
-    res.status(404).json({err: "notFound"});
-});
+app.use((_req, res) => res.status(404).json({err: "notFound"}));
