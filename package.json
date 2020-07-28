@@ -4,6 +4,9 @@
     "coredb-models": "https://github.com/alleshq/coredb-models",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "sharp": "^0.25.2"
+    "mariadb": "^2.4.2",
+    "sequelize": "^6.3.3",
+    "sharp": "^0.25.2",
+    "uuid": "7.0.3"
   }
 }

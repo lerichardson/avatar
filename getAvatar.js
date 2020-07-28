@@ -1,41 +1,34 @@
+const Avatar = require("./db");
 const axios = require("axios");
 const sharp = require("sharp");
 const fs = require("fs");
-const images = {
-    noUser: fs.readFileSync(`${__dirname}/images/noUser.png`),
-    placeholder: fs.readFileSync(`${__dirname}/images/placeholder.png`)
-};
+const placeholder = fs.readFileSync(`${__dirname}/images/placeholder.png`);
 
 module.exports = async (req, res) => {
-    const {id} = req.params;
-
-    // Get User
-    let user;
-    try {
-        user = (await axios.get(
-            `https://1api.alles.cx/v1/user?id=${encodeURIComponent(id)}`,
-            {
-                auth: {
-                    username: process.env.ALLES_ID,
-                    password: process.env.ALLES_SECRET
-                }
-            }
-        )).data;
-    } catch (err) {}
+    // Get most recent avatar for user
+    const avatar = (
+        await Avatar.findAll({
+            where: {
+                user: req.params.id
+            },
+            order: [["createdAt", "DESC"]],
+            limit: 1
+        })
+    )[0];
 
     // Get Image
     let image;
-    if (!user) image = images.noUser;
-    else if (!user.avatar) image = images.placeholder;
-    else {
+    if (avatar) {
         try {
-            image = (await axios.get(`https://fs.alles.cx/${user.avatar}`, {
-                responseType: "arraybuffer"
-            })).data;
+            image = (
+                await axios.get(`https://fs.alles.cx/${avatar.source}`, {
+                    responseType: "arraybuffer"
+                })
+            ).data;
         } catch (e) {
-            image = images.placeholder;
+            image = placeholder;
         }
-    }
+    } else image = placeholder;
 
     // Image Size
     const size =
