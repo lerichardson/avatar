@@ -21,9 +21,12 @@ module.exports = async (req, res) => {
     if (avatar) {
         try {
             image = (
-                await axios.get(`https://fs.alles.cx/${avatar.source}`, {
-                    responseType: "arraybuffer"
-                })
+                await axios.get(
+                    `${process.env.FILE_BASE}/${avatar.source}`,
+                    {
+                        responseType: "arraybuffer"
+                    }
+                )
             ).data;
         } catch (e) {
             image = placeholder;

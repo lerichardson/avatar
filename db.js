@@ -25,7 +25,7 @@ module.exports = db.define("avatar", {
         allowNull: false
     },
     source: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING,
         allowNull: false
     }
 }, {
