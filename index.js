@@ -4,7 +4,7 @@ const app = express();
 app.use(require("cors")());
 app.use(require("body-parser").json());
 app.use((_err, _req, res, _next) => res.status(500).json({err: "internalError"}));
-app.listen(8080, () => console.log("Listening on Express"));
+app.listen(8080, () => console.log("Server is listening..."));
 
 // Get Avatar
 app.get("/:id", require("./getAvatar"));
