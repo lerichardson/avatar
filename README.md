@@ -1,4 +1,1 @@
-# Alles Avatar Service
-This project serves avatars for AllesIDs.
-
-To access an avatar, simply go to `https://avatar.alles.cc/:userid`
+# TBD while I migrate most packages and test this
